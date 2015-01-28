@@ -1,0 +1,12 @@
+Build.PL
+Changes
+inc/My/ModuleBuild.pm
+lib/FFI/Platypus/Lang/CPP.pm
+LICENSE
+MANIFEST			This list of files
+META.json
+META.yml
+t/00_diag.t
+t/00_diag.txt
+t/01_use.t
+t/02_types.t
