@@ -3,7 +3,7 @@ use warnings;
 use Test::More tests => 1;
 use FFI::Platypus::Lang::CPP;
 
-my $types = FFI::Platypus::Lang::CPP->primitive_type_map;
+my $types = FFI::Platypus::Lang::CPP->native_type_map;
 
 foreach my $cpp_type (sort keys %$types)
 {
