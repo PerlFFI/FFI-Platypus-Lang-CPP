@@ -348,7 +348,6 @@ maintainer.  Extreme caution: if you like that sort of thing.
 
 The Core Platypus documentation.
 
-=over 4
 
 =item L<Module::Build::FFI>
 

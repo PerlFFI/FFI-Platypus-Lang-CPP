@@ -6,7 +6,7 @@ use Pod::Simple::Text;
 
 my $root = Pod::Abstract->load_file('lib/FFI/Platypus/Lang/CPP.pm');
 
-$_->detach for $root->select('//#cut');
+#$_->detach for $root->select('//#cut');
 
 pod2txt( $root => 'README' );
 

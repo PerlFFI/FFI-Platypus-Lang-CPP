@@ -297,16 +297,7 @@ SEE ALSO
 
       The Core Platypus documentation.
 
-      Module::Build::FFI
+    Module::Build::FFI
 
-	Bundle C or C++ with your FFI / Perl extension.
-
-POD ERRORS
-
-    Hey! The above document had some coding errors, which are explained
-    below:
-
-    Around line 296:
-
-      =over without closing =back
+      Bundle C or C++ with your FFI / Perl extension.
 
