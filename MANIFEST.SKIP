@@ -79,3 +79,8 @@
 
 # Avoid archives of this distribution
 \bFFI-Platypus-Lang-CPP-[\d\.\_]+
+
+\.o$
+\.so$
+\.dll$
+\.bundle$

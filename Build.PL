@@ -34,6 +34,7 @@ my $builder = My::ModuleBuild->new(
   requires => {
     'perl',         => '5.008001',
     'FFI::Platypus' => '0.16',
+    'Parse::nm'     => 0,
   },
 );
 

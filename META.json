@@ -23,6 +23,7 @@
       "runtime" : {
          "requires" : {
             "FFI::Platypus" : "0.16",
+            "Parse::nm" : "0",
             "perl" : "5.008001"
          }
       }

@@ -19,6 +19,7 @@ provides:
     version: '0.01'
 requires:
   FFI::Platypus: '0.16'
+  Parse::nm: '0'
   perl: '5.008001'
 resources:
   license: http://dev.perl.org/licenses/
