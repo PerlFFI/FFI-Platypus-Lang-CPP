@@ -37,6 +37,8 @@ sub new
 sub DESTROY
 {
   my($self) = @_;
+  _DESTROY($self);
+  free($$self);
 }
 
 package main;

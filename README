@@ -93,6 +93,8 @@ SYNOPSIS
      sub DESTROY
      {
        my($self) = @_;
+       _DESTROY($self);
+       free($$self);
      }
      
      package main;
@@ -107,12 +109,12 @@ DESCRIPTION
 
     This module provides some hooks for Platypus so that C++ names can be
     mangled for you. It uses the same primitive types as C. This document
-    also contains issues and caveats that I have discovered in my attempts
+    also documents issues and caveats that I have discovered in my attempts
     to work with C++ and FFI.
 
     This module is somewhat experimental. It is also available for adoption
     for anyone either sufficiently knowledgable about C++ or eager enough
-    to learn enough about C++. If you are interest, please send me a pull
+    to learn enough about C++. If you are interested, please send me a pull
     request or two on the project's GitHub.
 
     There are numerous difficulties and caveats involved in using C++
@@ -136,12 +138,15 @@ CAVEATS
     C++ names are "mangled" to handle features such as function overloading
     and the fact that some characters in the C++ names are illegal machine
     code symbol names. What this means is that the C++ member function
-    Foo::get_bar lookd like _ZN3Foo7get_barEv to FFI::Platypus. What makes
+    Foo::get_bar looks like _ZN3Foo7get_barEv to FFI::Platypus. What makes
     this even trickier is that different C++ compilers provide different
     mangling formats. When you use the FFI::Platypus#lang method to tell
-    Platypus that you are intending to use it with C++, it will mangle the
-    names that you give it. That saves you having to figure out the "real"
-    name for Foo::get_bar.
+    Platypus that you are intending to use it with C++, like this:
+
+     $ffi->lang('CPP');
+
+    it will mangle the names that you give it. That saves you having to
+    figure out the "real" name for Foo::get_bar.
 
     The current implementation uses the c++filt command. It goes though
     each of the libraries and translates each mangled name back into its
@@ -168,6 +173,8 @@ CAVEATS
 
     Then instead of attaching Foo::bar() attach my_bar.
 
+     $ffi->attach( my_bar => [ 'Foo' ] => 'int' );
+
  constructors, destructors and methods
 
     Constructors and destructors are essentially just functions that do not
@@ -175,7 +182,7 @@ CAVEATS
     when it is no longer needed (respectively). They take a pointer to the
     object (this) as their first argument. Constructors can take additional
     arguments, as you might expect they just come after the object itself.
-    Destructors take no arguments other than the object.
+    Destructors take no arguments other than the object itself (this).
 
     You need to alloate the memory needed for the object before you call
     the constructor and free it after calling the destructor. The tricky
@@ -198,14 +205,14 @@ CAVEATS
     the problem that you are having. The Gnu C++ compiler, g++ has an
     option to force it to emit the symbols, even for inlined functions:
 
-     -fkeep-inline-functions
+     -fkeep-inline-functions     # use this
 
     Clang has an option to do the opposite of this:
 
      -fvisibility-inlines-hidden # do not use this
 
-    but unhelpfully not a way to keep inlined functions. As far as I can
-    tell.
+    but unhelpfully not a way to keep inlined functions. At least, as far
+    as I can tell.
 
     If you have the source of the C++ and you can recompile it you can also
     optionally change it to not use inlined functions. In addition to
@@ -222,11 +229,11 @@ CAVEATS
 
      class Foo {
        public:
-         int bar();
+         int bar();              # RIGHT
      }
      
      int
-     Foo::bar()
+     Foo::bar()                  # RIGHT
      {
        return 1;
      }
@@ -264,7 +271,8 @@ METHODS
  mangler
 
      my $mangler = FFI::Platypus::Lang::CPP->mangler($ffi->libs);
-     print $mangler->("_ZN9MyInteger7int_sumEii") # prints MyInteger::int_sum(int, int)
+     # prints MyInteger::int_sum(int, int)
+     print $mangler->("_ZN9MyInteger7int_sumEii");
 
     Returns a subroutine reference that will "mangle" C++ names.
 

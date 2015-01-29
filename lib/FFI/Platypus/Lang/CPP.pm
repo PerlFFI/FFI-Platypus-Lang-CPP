@@ -101,6 +101,8 @@ Perl:
  sub DESTROY
  {
    my($self) = @_;
+   _DESTROY($self);
+   free($$self);
  }
  
  package main;
@@ -115,12 +117,12 @@ Perl:
 
 This module provides some hooks for Platypus so that C++ names can be 
 mangled for you.  It uses the same primitive types as C.  This document 
-also contains issues and caveats that I have discovered in my attempts 
+also documents issues and caveats that I have discovered in my attempts 
 to work with C++ and FFI.
 
 This module is somewhat experimental.  It is also available for adoption 
 for anyone either sufficiently knowledgable about C++ or eager enough to 
-learn enough about C++.  If you are interest, please send me a pull 
+learn enough about C++.  If you are interested, please send me a pull 
 request or two on the project's GitHub.
 
 There are numerous difficulties and caveats involved in using C++ 
@@ -144,12 +146,16 @@ compiler.  I have done some testing with C<clang> as well.
 C++ names are "mangled" to handle features such as function overloading 
 and the fact that some characters in the C++ names are illegal machine 
 code symbol names.  What this means is that the C++ member function 
-C<Foo::get_bar> lookd like C<_ZN3Foo7get_barEv> to L<FFI::Platypus>.  
+C<Foo::get_bar> looks like C<_ZN3Foo7get_barEv> to L<FFI::Platypus>.  
 What makes this even trickier is that different C++ compilers provide 
 different mangling formats.  When you use the L<FFI::Platypus#lang> 
-method to tell Platypus that you are intending to use it with C++, it 
-will mangle the names that you give it.  That saves you having to figure 
-out the "real" name for C<Foo::get_bar>.
+method to tell Platypus that you are intending to use it with C++, like 
+this:
+
+ $ffi->lang('CPP');
+
+it will mangle the names that you give it.  That saves you having to 
+figure out the "real" name for C<Foo::get_bar>.
 
 The current implementation uses the C<c++filt> command.  It goes though 
 each of the libraries and translates each mangled name back into its C++ 
@@ -176,6 +182,8 @@ using the C<extern "C"> trick:
 
 Then instead of attaching C<Foo::bar()> attach C<my_bar>. 
 
+ $ffi->attach( my_bar => [ 'Foo' ] => 'int' );
+
 =head2 constructors, destructors and methods
 
 Constructors and destructors are essentially just functions that do not 
@@ -183,7 +191,8 @@ return a value that need to be called when the object is created and
 when it is no longer needed (respectively).  They take a pointer to the 
 object (C<this>) as their first argument.  Constructors can take 
 additional arguments, as you might expect they just come after the 
-object itself.  Destructors take no arguments other than the object.
+object itself.  Destructors take no arguments other than the object 
+itself (C<this>).
 
 You need to alloate the memory needed for the object before you call the 
 constructor and free it after calling the destructor.  The tricky bit is 
@@ -206,14 +215,14 @@ even though you are sure that class has that method, this is probably
 the problem that you are having.  The Gnu C++ compiler, C<g++> has an 
 option to force it to emit the symbols, even for inlined functions:
 
- -fkeep-inline-functions
+ -fkeep-inline-functions     # use this
 
 Clang has an option to do the opposite of this:
 
  -fvisibility-inlines-hidden # do not use this
 
-but unhelpfully not a way to keep inlined functions.  As far as I can 
-tell.
+but unhelpfully not a way to keep inlined functions.  At least, as far 
+as I can tell.
 
 If you have the source of the C++ and you can recompile it you can also 
 optionally change it to not use inlined functions.  In addition to 
@@ -230,11 +239,11 @@ Do this:
 
  class Foo {
    public:
-     int bar();
+     int bar();              # RIGHT
  }
  
  int
- Foo::bar()
+ Foo::bar()                  # RIGHT
  {
    return 1;
  }
@@ -280,7 +289,8 @@ sub native_type_map
 =head2 mangler
 
  my $mangler = FFI::Platypus::Lang::CPP->mangler($ffi->libs);
- print $mangler->("_ZN9MyInteger7int_sumEii") # prints MyInteger::int_sum(int, int)
+ # prints MyInteger::int_sum(int, int)
+ print $mangler->("_ZN9MyInteger7int_sumEii");
 
 Returns a subroutine reference that will "mangle" C++ names.
 
