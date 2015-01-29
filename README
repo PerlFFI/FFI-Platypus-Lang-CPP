@@ -130,7 +130,7 @@ DESCRIPTION
 
 CAVEATS
 
-    In General I have done my research of FFI and C++ using the Gnu C++
+    In general I have done my research of FFI and C++ using the Gnu C++
     compiler. I have done some testing with clang as well.
 
  name mangling

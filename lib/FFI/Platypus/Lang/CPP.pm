@@ -138,7 +138,7 @@ L<https://github.com/plicease/Color-FFI>
 
 =head1 CAVEATS
 
-In General I have done my research of FFI and C++ using the Gnu C++ 
+In general I have done my research of FFI and C++ using the Gnu C++ 
 compiler.  I have done some testing with C<clang> as well.
 
 =head2 name mangling

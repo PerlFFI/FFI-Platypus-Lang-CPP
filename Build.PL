@@ -28,12 +28,19 @@ my $builder = My::ModuleBuild->new(
   configure_requires => {
     'Module::Build'      => 0.38,
     'ExtUtils::CBuilder' => 0,
+    'Module::Build::FFI' => 0.18,
   },
   build_requires => {
+    'Module::Build'      => 0.38,
+    'ExtUtils::CBuilder' => 0,
+    'Module::Build::FFI' => 0.18,
+  },
+  test_requires => {
+    'FFI::CheckLib' => 0,
   },
   requires => {
     'perl',         => '5.008001',
-    'FFI::Platypus' => '0.16',
+    'FFI::Platypus' => '0.18',
     'Parse::nm'     => 0,
   },
   meta_merge => {
