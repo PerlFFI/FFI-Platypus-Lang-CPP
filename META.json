@@ -13,6 +13,11 @@
       "version" : "2"
    },
    "name" : "FFI-Platypus-Lang-CPP",
+   "no_index" : {
+      "directory" : [
+         "examples"
+      ]
+   },
    "prereqs" : {
       "configure" : {
          "requires" : {
@@ -36,9 +41,15 @@
    },
    "release_status" : "stable",
    "resources" : {
+      "bugtracker" : {
+         "web" : "http://github.com/plicease/FFI-Platypus-Lang-CPP/issues"
+      },
       "license" : [
          "http://dev.perl.org/licenses/"
-      ]
+      ],
+      "repository" : {
+         "url" : "http://github.com/plicease/FFI-Platypus-Lang-CPP"
+      }
    },
    "version" : "0.01"
 }

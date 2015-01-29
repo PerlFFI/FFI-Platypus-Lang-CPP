@@ -13,6 +13,9 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
 name: FFI-Platypus-Lang-CPP
+no_index:
+  directory:
+    - examples
 provides:
   FFI::Platypus::Lang::CPP:
     file: lib/FFI/Platypus/Lang/CPP.pm
@@ -22,5 +25,7 @@ requires:
   Parse::nm: '0'
   perl: '5.008001'
 resources:
+  bugtracker: http://github.com/plicease/FFI-Platypus-Lang-CPP/issues
   license: http://dev.perl.org/licenses/
+  repository: http://github.com/plicease/FFI-Platypus-Lang-CPP
 version: '0.01'

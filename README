@@ -5,16 +5,253 @@ NAME
 
 SYNOPSIS
 
+    C++:
+
+     // on Linux compile with: g++ --shared -o basic.so basic.cpp
+     // elsewhere, consult your C++ compiler documentation
+     
+     class Foo {
+     
+     public:
+     
+       Foo();
+       ~Foo();
+     
+       int get_bar();
+       void set_bar(int);
+     
+       int _size();
+     
+     private:
+     
+       int bar;
+     
+     };
+     
+     Foo::Foo()
+     {
+       bar = 0;
+     }
+     
+     Foo::~Foo()
+     {
+     }
+     
+     int
+     Foo::get_bar()
+     {
+       return bar;
+     }
+     
+     void
+     Foo::set_bar(int value)
+     {
+       bar = value;
+     }
+     
+     int
+     Foo::_size()
+     {
+       return sizeof(Foo);
+     }
+
+    Perl:
+
+     package Foo;
+     
      use FFI::Platypus;
+     use FFI::Platypus::Memory qw( malloc free );
+     
      my $ffi = FFI::Platypus->new;
-     $ffi->with('CPP');
+     $ffi->lang('CPP');
+     $ffi->lib('./basic.so');
+     
+     $ffi->custom_type( Foo => {
+       native_type => 'opaque',
+       perl_to_native => sub { ${ $_[0] } },
+       native_to_perl => sub { bless \$_[0], 'Foo' },
+     });
+     
+     $ffi->attach( [ 'Foo::Foo()'     => '_new'     ] => ['Foo']  => 'void' );
+     $ffi->attach( [ 'Foo::~Foo()'    => '_DESTROY' ] => ['Foo']  => 'void' );
+     $ffi->attach( [ 'Foo::get_bar()' => 'get_bar'  ] => ['Foo']  => 'int'  );
+     $ffi->attach( [ 'Foo::set_bar(int)' 
+                                      => 'set_bar'  ] => ['Foo','int']
+                                                                  => 'void' );
+     
+     my $size = $ffi->function('Foo::_size()' => [] => 'int')->call;
+     
+     sub new
+     {
+       my($class) = @_;
+       my $ptr = malloc $size;
+       my $self = bless \$ptr, $class;
+       _new($self);
+       $self;
+     }
+     
+     sub DESTROY
+     {
+       my($self) = @_;
+     }
+     
+     package main;
+     
+     my $foo = Foo->new;
+     
+     print $foo->get_bar, "\n";  # 0
+     $foo->set_bar(22);
+     print $foo->get_bar. "\n";  # 22
 
 DESCRIPTION
 
-    This module provides some hooks for Platypus to interact with the C++
-    programming language.
+    This module provides some hooks for Platypus so that C++ names can be
+    mangled for you. It uses the same primitive types as C. This document
+    also contains issues and caveats that I have discovered in my attempts
+    to work with C++ and FFI.
+
+    This module is somewhat experimental. It is also available for adoption
+    for anyone either sufficiently knowledgable about C++ or eager enough
+    to learn enough about C++. If you are interest, please send me a pull
+    request or two on the project's GitHub.
+
+    There are numerous difficulties and caveats involved in using C++
+    libraries from Perl via FFI. This document is intended to enlighten on
+    that subject.
+
+    Note that in addition to using pre-compiled C++ libraries you can
+    bundle C++ code with your Perl distribution using Module::Build::FFI.
+    For a complete example, which attempts to address the caveats listed
+    below you can take a look at this sample distro on GitHub:
+
+    https://github.com/plicease/Color-FFI
+
+CAVEATS
+
+    In General I have done my research of FFI and C++ using the Gnu C++
+    compiler. I have done some testing with clang as well.
+
+ name mangling
+
+    C++ names are "mangled" to handle features such as function overloading
+    and the fact that some characters in the C++ names are illegal machine
+    code symbol names. What this means is that the C++ member function
+    Foo::get_bar lookd like _ZN3Foo7get_barEv to FFI::Platypus. What makes
+    this even trickier is that different C++ compilers provide different
+    mangling formats. When you use the FFI::Platypus#lang method to tell
+    Platypus that you are intending to use it with C++, it will mangle the
+    names that you give it. That saves you having to figure out the "real"
+    name for Foo::get_bar.
+
+    The current implementation uses the c++filt command. It goes though
+    each of the libraries and translates each mangled name back into its
+    C++ name. In the future this module may take a different approach. I am
+    pretty sure that this will not work with all compilers, so in the
+    future different approaches may be taken with different compilers.
+
+    If the approach to mangling C++ names described above does not work for
+    you, or if it makes you feel slightly queasy, then you can also write C
+    wrapper functions around each C++ method that you want to call from
+    Perl. You can write these wrapper functions right in your C++ code
+    using the extern "C" trick:
+
+     class Foo {
+       public:
+         int bar() { return 1; }
+     }
+     
+     extern "C" int
+     my_bar(Class *foo)
+     {
+       return foo->bar();
+     }
+
+    Then instead of attaching Foo::bar() attach my_bar.
+
+ constructors, destructors and methods
+
+    Constructors and destructors are essentially just functions that do not
+    return a value that need to be called when the object is created and
+    when it is no longer needed (respectively). They take a pointer to the
+    object (this) as their first argument. Constructors can take additional
+    arguments, as you might expect they just come after the object itself.
+    Destructors take no arguments other than the object.
+
+    You need to alloate the memory needed for the object before you call
+    the constructor and free it after calling the destructor. The tricky
+    bit is figuring out how much memory to allocate. If you have access to
+    the header file that describes the class and a compiler you can compute
+    the size from within C++ and hand it off to Perl using a static method
+    as I did in the "SYNOPSIS" above.
+
+    Regular methods also take the object pointer as their first argument.
+    Additional arguments follow, and they may or may not return a value.
+
+ inline functions
+
+    C++ compilers typically do not emit symbols for inlined functions. If
+    you get a message like this:
+
+     unable to find Foo::get_bar() at basic line 21
+
+    even though you are sure that class has that method, this is probably
+    the problem that you are having. The Gnu C++ compiler, g++ has an
+    option to force it to emit the symbols, even for inlined functions:
+
+     -fkeep-inline-functions
+
+    Clang has an option to do the opposite of this:
+
+     -fvisibility-inlines-hidden # do not use this
+
+    but unhelpfully not a way to keep inlined functions. As far as I can
+    tell.
+
+    If you have the source of the C++ and you can recompile it you can also
+    optionally change it to not use inlined functions. In addition to
+    removing any inline keywords from the source, you need to move the
+    implementations of any methods outside of the class body. That is, do
+    not do this:
+
+     class Foo {
+       public:
+         int bar() { return 1; } # WRONG
+     }
+
+    Do this:
+
+     class Foo {
+       public:
+         int bar();
+     }
+     
+     int
+     Foo::bar()
+     {
+       return 1;
+     }
+
+ the standard C++ library
+
+    If you are getting errors like this:
+
+     unable to find Foo::Foo()
+
+    that can't be explained by the issues described above, set the
+    environment variable FFI_PLATYPUS_DLERROR to a true value and try
+    again. If you see a warning like this:
+
+     error loading Foo.so: Foo.so: undefined symbol: __gxx_personality_v0
+
+    then you probably need to explicitly link with the standard C++
+    library. On Linux you can do this by adding -lstdc++ to your linker
+    flags. Other compilers are of course probably different.
 
 METHODS
+
+    Generally you will not use this class directly, instead interacting
+    with the FFI::Platypus instance. However, the public methods used by
+    Platypus are documented here.
 
  native_type_map
 
@@ -24,9 +261,52 @@ METHODS
     programming languages. That is the keys are native C++ types and the
     values are libffi native types.
 
+ mangler
+
+     my $mangler = FFI::Platypus::Lang::CPP->mangler($ffi->libs);
+     print $mangler->("_ZN9MyInteger7int_sumEii") # prints MyInteger::int_sum(int, int)
+
+    Returns a subroutine reference that will "mangle" C++ names.
+
+EXAMPLES
+
+    See the above "SYNOPSIS" or the examples directory that came with this
+    distribution.
+
+SUPPORT
+
+    If something does not work as advertised, or the way that you think it
+    should, or if you have a feature request, please open an issue on this
+    project's GitHub issue tracker:
+
+    https://github.com/plicease/FFI-Platypus-Lang-CPP/issues
+
+CONTRIBUTING
+
+    If you have implemented a new feature or fixed a bug then you may make
+    a pull reequest on this project's GitHub repository:
+
+    https://github.com/plicease/FFI-Platypus-Lang-CPP/issues
+
+    Caution: if you do this too frequently I may nominate you as the new
+    maintainer. Extreme caution: if you like that sort of thing.
+
 SEE ALSO
 
     FFI::Platypus
 
       The Core Platypus documentation.
+
+      Module::Build::FFI
+
+	Bundle C or C++ with your FFI / Perl extension.
+
+POD ERRORS
+
+    Hey! The above document had some coding errors, which are explained
+    below:
+
+    Around line 296:
+
+      =over without closing =back
 

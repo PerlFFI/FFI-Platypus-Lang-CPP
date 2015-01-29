@@ -36,6 +36,15 @@ my $builder = My::ModuleBuild->new(
     'FFI::Platypus' => '0.16',
     'Parse::nm'     => 0,
   },
+  meta_merge => {
+    resources  => {
+      repository => "http://github.com/plicease/FFI-Platypus-Lang-CPP",
+      bugtracker => "http://github.com/plicease/FFI-Platypus-Lang-CPP/issues",
+    },
+    no_index => {
+      directory => [ 'examples' ],
+    },
+  },
 );
 
 $builder->add_to_cleanup(
