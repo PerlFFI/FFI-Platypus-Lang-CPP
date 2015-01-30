@@ -19,17 +19,30 @@
       ]
    },
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::CBuilder" : "0",
+            "Module::Build" : "0.38",
+            "Module::Build::FFI" : "0.18"
+         }
+      },
       "configure" : {
          "requires" : {
             "ExtUtils::CBuilder" : "0",
-            "Module::Build" : "0.38"
+            "Module::Build" : "0.38",
+            "Module::Build::FFI" : "0.18"
          }
       },
       "runtime" : {
          "requires" : {
-            "FFI::Platypus" : "0.16",
+            "FFI::Platypus" : "0.18",
             "Parse::nm" : "0",
             "perl" : "5.008001"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "FFI::CheckLib" : "0"
          }
       }
    },
