@@ -49,7 +49,7 @@
    "provides" : {
       "FFI::Platypus::Lang::CPP" : {
          "file" : "lib/FFI/Platypus/Lang/CPP.pm",
-         "version" : "0.01"
+         "version" : "0.02"
       }
    },
    "release_status" : "stable",
@@ -64,5 +64,5 @@
          "url" : "http://github.com/plicease/FFI-Platypus-Lang-CPP"
       }
    },
-   "version" : "0.01"
+   "version" : "0.02"
 }
