@@ -289,8 +289,8 @@ sub native_type_map
 =head2 mangler
 
  my $mangler = FFI::Platypus::Lang::CPP->mangler($ffi->libs);
- # prints MyInteger::int_sum(int, int)
- print $mangler->("_ZN9MyInteger7int_sumEii");
+ # prints _ZN9MyInteger7int_sumEii
+ print $mangler->("MyInteger::int_sum(int, int)");
 
 Returns a subroutine reference that will "mangle" C++ names.
 
