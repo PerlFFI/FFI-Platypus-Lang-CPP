@@ -5,7 +5,7 @@ use FFI::CheckLib qw( find_lib );
 use FFI::Platypus;
 
 my $libtest = find_lib lib => 'test', libpath => 'libtest';
-plan skip_all => 'test requires a rust compiler'
+plan skip_all => 'test requires a C++ compiler'
   unless $libtest;
 
 plan tests => 2;
