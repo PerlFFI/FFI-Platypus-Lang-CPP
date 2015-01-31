@@ -314,6 +314,7 @@ sub mangler
           my $cpp_symbol = `c++filt $c_symbol`;
           chomp $cpp_symbol;
           return if $c_symbol eq $cpp_symbol;
+          $c_symbol =~ s{^_}{} if $^O =~ /^(darwin)$/;
           $mangle{$cpp_symbol} = $c_symbol;
         },
       } ],

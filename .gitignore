@@ -9,3 +9,5 @@
 *.o
 *.dll
 *.so
+*.bundle
+*.dylib

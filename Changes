@@ -1,5 +1,8 @@
 Revision history for Perl module FFI::Platypus::Lang::CPP
 
+  - Trim the mangled name from nm on at least some platforms
+    that require it.
+
 0.02  Jan 30, 2015
   - Documentation fixes
 
