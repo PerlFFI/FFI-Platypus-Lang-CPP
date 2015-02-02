@@ -22,9 +22,9 @@ unless(ExtUtils::CBuilder->new->have_cplusplus)
 }
 
 my %req = (
-  'perl',         => '5.008001',
-  'FFI::Platypus' => '0.18',
-  'Parse::nm'     => 0,
+  'perl',               => '5.008001',
+  'FFI::Platypus'       => '0.18',
+  'FFI::ExtractSymbols' => 0,
 );
 
 $req{'FFI::Platypus::Lang::CPP::Demangle::XS'} = 0

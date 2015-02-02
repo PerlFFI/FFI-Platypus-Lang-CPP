@@ -2,6 +2,7 @@ package FFI::Platypus::Lang::CPP;
 
 use strict;
 use warnings;
+use FFI::ExtractSymbols qw( extract_symbols );
 use FFI::Platypus;
 
 our $VERSION = '0.02';
@@ -313,20 +314,15 @@ sub mangler
   
   foreach my $libpath (@libs)
   {
-    require Parse::nm;
-    Parse::nm->run(
-      files => $libpath,
-      filters => [ {
-        action => sub {
-          my $c_symbol = $_[0];
-          my $cpp_symbol = _demangle($c_symbol);
-          return unless defined $cpp_symbol;
-          chomp $cpp_symbol;
-          return if $c_symbol eq $cpp_symbol;
-          $c_symbol =~ s{^_}{} if $^O =~ /^(darwin)$/;
-          $mangle{$cpp_symbol} = $c_symbol;
-        },
-      } ],
+    extract_symbols($libpath,
+      export => sub {
+        my($symbol1, $symbol2) = @_;
+        my $cpp_symbol = _demangle($symbol2);
+        return unless defined $cpp_symbol;
+        chomp $cpp_symbol;
+        return if $cpp_symbol eq $symbol2;
+        $mangle{$cpp_symbol} = $symbol1;
+      },
     );
   }
   

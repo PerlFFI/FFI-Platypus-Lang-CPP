@@ -29,14 +29,16 @@
       "configure" : {
          "requires" : {
             "ExtUtils::CBuilder" : "0",
+            "ExtUtils::CppGuess" : "0",
+            "File::Which" : "0",
             "Module::Build" : "0.38",
             "Module::Build::FFI" : "0.18"
          }
       },
       "runtime" : {
          "requires" : {
+            "FFI::ExtractSymbols" : "0",
             "FFI::Platypus" : "0.18",
-            "Parse::nm" : "0",
             "perl" : "5.008001"
          }
       },

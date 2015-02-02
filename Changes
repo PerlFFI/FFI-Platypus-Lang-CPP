@@ -1,7 +1,9 @@
 Revision history for Perl module FFI::Platypus::Lang::CPP
 
-  - Trim the mangled name from nm on at least some platforms
-    that require it.
+  - Use ExtUtils::CppGuess to get the correct c++ flags
+  - Use FFI::ExtractSymbols instead of Parse::nm
+  - use FFI::Platypus::Lang::CPP::Demangle::XS if c++filt
+    is not found at install time.
 
 0.02  Jan 30, 2015
   - Documentation fixes
