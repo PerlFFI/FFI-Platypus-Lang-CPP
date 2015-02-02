@@ -296,6 +296,15 @@ Returns a subroutine reference that will "mangle" C++ names.
 
 =cut
 
+if(eval { require FFI::Platypus::Lang::CPP::Demangle::XS })
+{
+  *_demangle = \&FFI::Platypus::Lang::CPP::Demangle::XS::demangle;
+}
+else
+{
+  *_demangle = sub { `c++filt $_[0]` };
+}
+
 sub mangler
 {
   my($class, @libs) = @_;
@@ -310,8 +319,8 @@ sub mangler
       filters => [ {
         action => sub {
           my $c_symbol = $_[0];
-          # TODO: what to do if we do not have c++filt?
-          my $cpp_symbol = `c++filt $c_symbol`;
+          my $cpp_symbol = _demangle($c_symbol);
+          return unless defined $cpp_symbol;
           chomp $cpp_symbol;
           return if $c_symbol eq $cpp_symbol;
           $c_symbol =~ s{^_}{} if $^O =~ /^(darwin)$/;

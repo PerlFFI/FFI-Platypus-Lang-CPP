@@ -10,14 +10,25 @@ use lib 'inc';
 use lib 'lib';
 use My::ModuleBuild;
 use Env qw( @PATH );
+use ExtUtils::CppGuess;
 use ExtUtils::CBuilder;
 use File::Spec;
+use File::Which qw( which );
 
 unless(ExtUtils::CBuilder->new->have_cplusplus)
 {
   print "Unable to find C++.  Please make sure it is in the PATH.\n";
   print "You should still be able to use pre-compiled C++ dynamic libs.\n";
 }
+
+my %req = (
+  'perl',         => '5.008001',
+  'FFI::Platypus' => '0.18',
+  'Parse::nm'     => 0,
+);
+
+$req{'FFI::Platypus::Lang::CPP::Demangle::XS'} = 0
+  unless which('c++filt');
 
 my $builder = My::ModuleBuild->new(
   module_name   => 'FFI::Platypus::Lang::CPP',
@@ -29,6 +40,8 @@ my $builder = My::ModuleBuild->new(
     'Module::Build'      => 0.38,
     'ExtUtils::CBuilder' => 0,
     'Module::Build::FFI' => 0.18,
+    'File::Which'        => 0,
+    'ExtUtils::CppGuess' => 0,
   },
   build_requires => {
     'Module::Build'      => 0.38,
@@ -38,11 +51,7 @@ my $builder = My::ModuleBuild->new(
   test_requires => {
     'FFI::CheckLib' => 0,
   },
-  requires => {
-    'perl',         => '5.008001',
-    'FFI::Platypus' => '0.18',
-    'Parse::nm'     => 0,
-  },
+  requires => \%req,
   meta_merge => {
     resources  => {
       repository => "http://github.com/plicease/FFI-Platypus-Lang-CPP",
@@ -52,6 +61,7 @@ my $builder = My::ModuleBuild->new(
       directory => [ 'examples' ],
     },
   },
+  ExtUtils::CppGuess->new->module_build_options,
 );
 
 $builder->add_to_cleanup(
