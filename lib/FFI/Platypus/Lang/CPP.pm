@@ -23,6 +23,10 @@ C++:
  
  public:
  
+   // note you should avoid inlining functions
+   // for classes you intend to use with FFI
+   // as the compiler may not emit code/symbols
+   // for those functions.
    Foo();
    ~Foo();
  
@@ -158,11 +162,14 @@ this:
 it will mangle the names that you give it.  That saves you having to 
 figure out the "real" name for C<Foo::get_bar>.
 
-The current implementation uses the C<c++filt> command.  It goes though 
-each of the libraries and translates each mangled name back into its C++ 
-name.  In the future this module may take a different approach.  I am 
-pretty sure that this will not work with all compilers, so in the future 
-different approaches may be taken with different compilers.
+The current implementation uses the C<c++filt> command or 
+L<FFI::Platypus::Lang::CPP::Demangle::XS> if it is installed.  If 
+C<c++filt> cannot be found at install time, then 
+L<FFI::Platypus::Lang::CPP::Demangle::XS> will be made a prerequsite, so 
+you can have some confidence that this feature will work even if your 
+platform does not provide C<c++filt>.  The XS module is not a 
+prerequsite when C<c++filt> IS found because using C<c++filt> does not 
+require invoking the compiler and may be more reliable.
 
 If the approach to mangling C++ names described above does not work for 
 you, or if it makes you feel slightly queasy, then you can also write C 
@@ -222,8 +229,11 @@ Clang has an option to do the opposite of this:
 
  -fvisibility-inlines-hidden # do not use this
 
-but unhelpfully not a way to keep inlined functions.  At least, as far 
-as I can tell.
+but unhelpfully not a way to keep inlined functions.  This appears to be 
+a deliberate design decision made by the clang developers and it makes 
+sense for C++, since inline functions are typically defined in C++ 
+header files (.h) so it is difficult to determine in which object file 
+the uninlined inlined functions should go.
 
 If you have the source of the C++ and you can recompile it you can also 
 optionally change it to not use inlined functions.  In addition to 
@@ -262,8 +272,8 @@ If you see a warning like this:
  error loading Foo.so: Foo.so: undefined symbol: __gxx_personality_v0
 
 then you probably need to explicitly link with the standard C++ library.  
-On Linux you can do this by adding C<-lstdc++> to your linker flags.  
-Other compilers are of course probably different.
+The most portable way to deal with this is by using 
+L<ExtUtils::CppGuess>.
 
 =head1 METHODS
 
@@ -379,10 +389,14 @@ improve things.
 
 The Core Platypus documentation.
 
-
 =item L<Module::Build::FFI>
 
 Bundle C or C++ with your FFI / Perl extension.
+
+=item L<ExtUtils::CppGuess>
+
+Guess the appropriate C++ compiler / linker flags for your C compiler 
+platform combination.
 
 =back
 
