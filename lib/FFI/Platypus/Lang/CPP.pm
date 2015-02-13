@@ -353,8 +353,8 @@ determine the instance size of the class.
 
 =head2 Using a C++ class with a wrapper
 
-(For this example see examples/wrapper.{pl,cpp} that came with this
-distribution)
+(For the full source for this example, see examples/wrapper.{pl,cpp} 
+that came with this distribution)
 
 Sometimes it is easier to write wrapper functions around your new and
 delete operations.  Consider if you add these functions to the C++
@@ -386,9 +386,12 @@ their intended names.
 
 =head2 Exceptions
 
-If your library throws an exception and you do not catch it in C++ it
-is going to kill your program.  As an example, suppose C<set_bar> in the
-example above throws an exception:
+(For the full source of this example, see examples/exception.{pl,cpp} 
+that came with this distribution)
+
+If your library throws an exception and you do not catch it in C++ it 
+is going to kill your program.  As an example, suppose C<set_bar> in 
+the example above throws an exception:
 
  void
  Foo::set_bar(int value)

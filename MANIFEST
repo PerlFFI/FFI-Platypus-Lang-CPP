@@ -3,6 +3,8 @@ Changes
 CONTRIBUTING
 examples/basic.cpp
 examples/basic.pl
+examples/exception.cpp
+examples/exception.pl
 examples/wrapper.cpp
 examples/wrapper.pl
 inc/My/ModuleBuild.pm
