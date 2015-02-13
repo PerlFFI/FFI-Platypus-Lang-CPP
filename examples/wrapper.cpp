@@ -1,4 +1,4 @@
-// on Linux compile with: g++ --shared -o wrapper.so wrapper.cpp
+// on Linux compile with: g++ -fPIC --shared -o wrapper.so wrapper.cpp
 // elsewhere, consult your C++ compiler documentation
 
 class Foo {
@@ -19,12 +19,14 @@ private:
 
 };
 
-extern "C" Foo* Foo_new()
+extern "C"
+Foo* Foo_new()
 {
   return new Foo();
 }
 
-extern "C" void Foo_delete(Foo *foo)
+extern "C" void
+Foo_delete(Foo *foo)
 {
   delete foo;
 }

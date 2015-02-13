@@ -345,8 +345,146 @@ sub mangler
 
 =head1 EXAMPLES
 
-See the above L</SYNOPSIS> or the C<examples> directory that came with 
-this distribution.
+=head2 Using a C++ class without writing bundling any C/C++ code
+
+The example in the L</SYNOPSIS> shows how you I<can> use a C++ class
+without writing any wrapper code, though you will have to guess or
+determine the instance size of the class.
+
+=head2 Using a C++ class with a wrapper
+
+(For this example see examples/wrapper.{pl,cpp} that came with this
+distribution)
+
+Sometimes it is easier to write wrapper functions around your new and
+delete operations.  Consider if you add these functions to the C++
+source to the example in the L</SYNOPSIS>.
+
+ // These could also be class methods
+ extern "C" Foo*
+ Foo_new()
+ {
+   return new Foo();
+ }
+ 
+ extern "C" void
+ Foo_delete(Foo *foo)
+ {
+   delete foo;
+ }
+
+Now we can use this class without having to know I<in the perl code>
+what the size of the class is.  We declare the constructor and 
+destructor in Perl space like this:
+
+ $ffi->attach( [ 'Foo_new'        => 'new'      ] => []       => 'Foo' );
+ $ffi->attach( [ 'Foo_delete'     => 'DESTROY'  ] => ['Foo']  => 'void' );
+
+We've also removed the Perl C<new> and C<DESTROY> wrappers as they are
+unnecessary now, and so the the C++ functions are attached directly to
+their intended names.
+
+=head2 Exceptions
+
+If your library throws an exception and you do not catch it in C++ it
+is going to kill your program.  As an example, suppose C<set_bar> in the
+example above throws an exception:
+
+ void
+ Foo::set_bar(int value)
+ {
+   if(value > 512)
+     throw new FooException("too hot");
+   if(value < 0)
+     throw new FooException("too cold");
+    bar = value;
+ }
+
+Now if you try to use C<set_bar> with a bad value like this from Perl:
+
+ $foo->set_bar(-2);
+
+it will crash your Perl program.
+
+ terminate called after throwing an instance of 'FooException'
+ Abort
+
+To handle this, you need to write a wrapper around the C<set_bar>
+method.
+
+ static FooException *last_exception = NULL;
+ 
+ extern "C" FooException *
+ Foo_get_exception()
+ {
+   return last_exception;
+ }
+ 
+ extern "C" void
+ Foo_reset_exception()
+ {
+   if(last_exception != NULL)
+     delete last_exception;
+   last_exception = NULL;
+ }
+ 
+ extern "C" void
+ Foo_set_bar(Foo *foo, int value)
+ {
+   try
+   {
+     Foo_reset_exception();
+     foo->set_bar(value);
+   }
+   catch(FooException *e)
+   {
+     last_exception = e;
+   }
+ }
+
+Next we will write an interface to the FooException class in Perl:
+
+ package FooException;
+ 
+ use overload '""' => sub { "exception: " . $_[0]->message . "\n" };
+ 
+ $ffi->custom_type( FooException => {
+   native_type => 'opaque',
+   perl_to_native => sub { ${ $_[0] } },
+   native_to_perl => sub {
+     defined $_[0]
+     ? (bless \$_[0], 'FooException') 
+     : ();
+   },
+ });
+ 
+ $ffi->attach(
+   [ 'Foo_get_exception' => 'get_exception' ] => [] => 'FooException'
+ );
+ 
+ $ffi->attach(
+   [ 'FooException::message()' => 'message' ] => ['FooException'] => 'string'
+ );
+
+And finally we write a wrapper for the Perl C<set_bar> method.
+
+ $ffi->attach( [ 'Foo_set_bar'    => '_set_bar' ] => ['Foo','int']
+                                                              => 'void' );
+ sub set_bar
+ {
+   my($self, $value) = @_;
+   $self->_set_bar($value);
+   my $error = FooException->get_exception;
+   die $error if $error;
+ }
+
+And now when we give C<set_bar> a bogus value we get a Perl exception
+instead of an application crash:
+
+ exception: too cold
+
+So we can easily wrap the call to C<set_bar> in a Perl eval if we want
+to catch the exception and handle it.
 
 =head1 SUPPORT
 

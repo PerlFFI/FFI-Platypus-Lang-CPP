@@ -66,6 +66,18 @@ my $builder = My::ModuleBuild->new(
 
 $builder->add_to_cleanup(
   '*.bak',
+  'examples/*.o',
+  'examples/*.obj',
+  'examples/*.so',
+  'examples/*.bundle',
+  'examples/*.dylib',
+  'examples/*.dll',
+  'libtest/*.o',
+  'libtest/*.obj',
+  'libtest/*.so',
+  'libtest/*.bundle',
+  'libtest/*.dylib',
+  'libtest/*.dll',
   'FFI-Platypus-Lang-CPP-*',
 );
 

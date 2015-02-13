@@ -23,8 +23,6 @@ $ffi->attach( [ 'Foo::set_bar(int)'
                                  => 'set_bar'  ] => ['Foo','int']
                                                              => 'void' );
 
-my $size = $ffi->function('Foo::_size()' => [] => 'int')->call;
-
 package main;
 
 my $foo = Foo->new;

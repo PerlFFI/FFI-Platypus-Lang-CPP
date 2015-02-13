@@ -3,6 +3,8 @@ Changes
 CONTRIBUTING
 examples/basic.cpp
 examples/basic.pl
+examples/wrapper.cpp
+examples/wrapper.pl
 inc/My/ModuleBuild.pm
 inc/run/readme.pl
 INSTALL
