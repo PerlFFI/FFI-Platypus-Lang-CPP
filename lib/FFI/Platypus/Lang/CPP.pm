@@ -135,7 +135,7 @@ libraries from Perl via FFI.  This document is intended to enlighten on
 that subject.
 
 Note that in addition to using pre-compiled C++ libraries you can bundle
-C++ code with your Perl distribution using L<Module::Build::FFI>.  For a
+C++ code with your Perl distribution using L<FFI::Build>.  For a
 complete example, which attempts to address the caveats listed below you
 can take a look at this sample distro on GitHub:
 
@@ -530,7 +530,7 @@ improve things.
 
 The Core Platypus documentation.
 
-=item L<Module::Build::FFI>
+=item L<FFI::Build> + L<FFI::Build::File::CXX>
 
 Bundle C or C++ with your FFI / Perl extension.
 
