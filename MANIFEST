@@ -13,6 +13,7 @@ lib/FFI/Platypus/Lang/CPP.pm
 LICENSE
 maint/cip-before-install
 maint/readme.pl
+maint/releaseprep
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP

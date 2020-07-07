@@ -5,7 +5,7 @@ use warnings;
 use FFI::ExtractSymbols qw( extract_symbols );
 use FFI::Platypus 1.00;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 
