@@ -1,4 +1,3 @@
-/Build
 /*.bak
 /*.tmp
 /MYMETA.json
@@ -11,3 +10,7 @@
 *.so
 *.bundle
 *.dylib
+/Makefile
+/fbx.json
+/pm_to_blib
+/t/ffi/_build
