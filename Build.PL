@@ -54,8 +54,8 @@ my $builder = My::ModuleBuild->new(
   requires => \%req,
   meta_merge => {
     resources  => {
-      repository => "http://github.com/plicease/FFI-Platypus-Lang-CPP",
-      bugtracker => "http://github.com/plicease/FFI-Platypus-Lang-CPP/issues",
+      repository => "http://github.com/PerlFFI/FFI-Platypus-Lang-CPP",
+      bugtracker => "http://github.com/PerlFFI/FFI-Platypus-Lang-CPP/issues",
       x_IRC => "irc://irc.perl.org/#native",
     },
     no_index => {
