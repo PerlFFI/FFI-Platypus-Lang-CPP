@@ -39,7 +39,7 @@ $ffi->custom_type( FooException => {
   perl_to_native => sub { ${ $_[0] } },
   native_to_perl => sub {
     defined $_[0]
-    ? (bless \$_[0], 'FooException') 
+    ? (bless \$_[0], 'FooException')
     : ();
   },
 });

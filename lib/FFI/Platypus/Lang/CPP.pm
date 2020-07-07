@@ -88,7 +88,7 @@ Perl:
  $ffi->attach( [ 'Foo::Foo()'     => '_new'     ] => ['Foo']  => 'void' );
  $ffi->attach( [ 'Foo::~Foo()'    => '_DESTROY' ] => ['Foo']  => 'void' );
  $ffi->attach( [ 'Foo::get_bar()' => 'get_bar'  ] => ['Foo']  => 'int'  );
- $ffi->attach( [ 'Foo::set_bar(int)' 
+ $ffi->attach( [ 'Foo::set_bar(int)'
                                   => 'set_bar'  ] => ['Foo','int']
                                                               => 'void' );
  
@@ -120,61 +120,61 @@ Perl:
 
 =head1 DESCRIPTION
 
-This module provides some hooks for Platypus so that C++ names can be 
-mangled for you.  It uses the same primitive types as C.  This document 
-also documents issues and caveats that I have discovered in my attempts 
+This module provides some hooks for Platypus so that C++ names can be
+mangled for you.  It uses the same primitive types as C.  This document
+also documents issues and caveats that I have discovered in my attempts
 to work with C++ and FFI.
 
-This module is somewhat experimental.  It is also available for adoption 
-for anyone either sufficiently knowledgable about C++ or eager enough to 
-learn enough about C++.  If you are interested, please send me a pull 
+This module is somewhat experimental.  It is also available for adoption
+for anyone either sufficiently knowledgable about C++ or eager enough to
+learn enough about C++.  If you are interested, please send me a pull
 request or two on the project's GitHub.
 
-There are numerous difficulties and caveats involved in using C++ 
-libraries from Perl via FFI.  This document is intended to enlighten on 
+There are numerous difficulties and caveats involved in using C++
+libraries from Perl via FFI.  This document is intended to enlighten on
 that subject.
 
-Note that in addition to using pre-compiled C++ libraries you can bundle 
-C++ code with your Perl distribution using L<Module::Build::FFI>.  For a 
-complete example, which attempts to address the caveats listed below you 
+Note that in addition to using pre-compiled C++ libraries you can bundle
+C++ code with your Perl distribution using L<Module::Build::FFI>.  For a
+complete example, which attempts to address the caveats listed below you
 can take a look at this sample distro on GitHub:
 
 L<https://github.com/plicease/Color-FFI>
 
 =head1 CAVEATS
 
-In general I have done my research of FFI and C++ using the Gnu C++ 
+In general I have done my research of FFI and C++ using the Gnu C++
 compiler.  I have done some testing with C<clang> as well.
 
 =head2 name mangling
 
-C++ names are "mangled" to handle features such as function overloading 
-and the fact that some characters in the C++ names are illegal machine 
-code symbol names.  What this means is that the C++ member function 
-C<Foo::get_bar> looks like C<_ZN3Foo7get_barEv> to L<FFI::Platypus>.  
-What makes this even trickier is that different C++ compilers provide 
-different mangling formats.  When you use the L<FFI::Platypus#lang> 
-method to tell Platypus that you are intending to use it with C++, like 
+C++ names are "mangled" to handle features such as function overloading
+and the fact that some characters in the C++ names are illegal machine
+code symbol names.  What this means is that the C++ member function
+C<Foo::get_bar> looks like C<_ZN3Foo7get_barEv> to L<FFI::Platypus>.
+What makes this even trickier is that different C++ compilers provide
+different mangling formats.  When you use the L<FFI::Platypus#lang>
+method to tell Platypus that you are intending to use it with C++, like
 this:
 
  $ffi->lang('CPP');
 
-it will mangle the names that you give it.  That saves you having to 
+it will mangle the names that you give it.  That saves you having to
 figure out the "real" name for C<Foo::get_bar>.
 
-The current implementation uses the C<c++filt> command or 
-L<FFI::Platypus::Lang::CPP::Demangle::XS> if it is installed.  If 
-C<c++filt> cannot be found at install time, then 
-L<FFI::Platypus::Lang::CPP::Demangle::XS> will be made a prerequsite, so 
-you can have some confidence that this feature will work even if your 
-platform does not provide C<c++filt>.  The XS module is not a 
-prerequsite when C<c++filt> IS found because using C<c++filt> does not 
+The current implementation uses the C<c++filt> command or
+L<FFI::Platypus::Lang::CPP::Demangle::XS> if it is installed.  If
+C<c++filt> cannot be found at install time, then
+L<FFI::Platypus::Lang::CPP::Demangle::XS> will be made a prerequsite, so
+you can have some confidence that this feature will work even if your
+platform does not provide C<c++filt>.  The XS module is not a
+prerequsite when C<c++filt> IS found because using C<c++filt> does not
 require invoking the compiler and may be more reliable.
 
-If the approach to mangling C++ names described above does not work for 
-you, or if it makes you feel slightly queasy, then you can also write C 
-wrapper functions around each C++ method that you want to call from 
-Perl.  You can write these wrapper functions right in your C++ code 
+If the approach to mangling C++ names described above does not work for
+you, or if it makes you feel slightly queasy, then you can also write C
+wrapper functions around each C++ method that you want to call from
+Perl.  You can write these wrapper functions right in your C++ code
 using the C<extern "C"> trick:
 
  class Foo {
@@ -188,39 +188,39 @@ using the C<extern "C"> trick:
    return foo->bar();
  }
 
-Then instead of attaching C<Foo::bar()> attach C<my_bar>. 
+Then instead of attaching C<Foo::bar()> attach C<my_bar>.
 
  $ffi->attach( my_bar => [ 'Foo' ] => 'int' );
 
 =head2 constructors, destructors and methods
 
-Constructors and destructors are essentially just functions that do not 
-return a value that need to be called when the object is created and 
-when it is no longer needed (respectively).  They take a pointer to the 
-object (C<this>) as their first argument.  Constructors can take 
-additional arguments, as you might expect they just come after the 
-object itself.  Destructors take no arguments other than the object 
+Constructors and destructors are essentially just functions that do not
+return a value that need to be called when the object is created and
+when it is no longer needed (respectively).  They take a pointer to the
+object (C<this>) as their first argument.  Constructors can take
+additional arguments, as you might expect they just come after the
+object itself.  Destructors take no arguments other than the object
 itself (C<this>).
 
-You need to alloate the memory needed for the object before you call the 
-constructor and free it after calling the destructor.  The tricky bit is 
-figuring out how much memory to allocate.  If you have access to the 
-header file that describes the class and a compiler you can compute the 
-size from within C++ and hand it off to Perl using a static method as I 
+You need to alloate the memory needed for the object before you call the
+constructor and free it after calling the destructor.  The tricky bit is
+figuring out how much memory to allocate.  If you have access to the
+header file that describes the class and a compiler you can compute the
+size from within C++ and hand it off to Perl using a static method as I
 did in the L</SYNOPSIS> above.
 
-Regular methods also take the object pointer as their first argument.  
+Regular methods also take the object pointer as their first argument.
 Additional arguments follow, and they may or may not return a value.
 
 =head2 inline functions
 
-C++ compilers typically do not emit symbols for inlined functions.  If 
+C++ compilers typically do not emit symbols for inlined functions.  If
 you get a message like this:
 
  unable to find Foo::get_bar() at basic line 21
 
-even though you are sure that class has that method, this is probably 
-the problem that you are having.  The Gnu C++ compiler, C<g++> has an 
+even though you are sure that class has that method, this is probably
+the problem that you are having.  The Gnu C++ compiler, C<g++> has an
 option to force it to emit the symbols, even for inlined functions:
 
  -fkeep-inline-functions     # use this
@@ -229,16 +229,16 @@ Clang has an option to do the opposite of this:
 
  -fvisibility-inlines-hidden # do not use this
 
-but unhelpfully not a way to keep inlined functions.  This appears to be 
-a deliberate design decision made by the clang developers and it makes 
-sense for C++, since inline functions are typically defined in C++ 
-header files (.h) so it is difficult to determine in which object file 
+but unhelpfully not a way to keep inlined functions.  This appears to be
+a deliberate design decision made by the clang developers and it makes
+sense for C++, since inline functions are typically defined in C++
+header files (.h) so it is difficult to determine in which object file
 the uninlined inlined functions should go.
 
-If you have the source of the C++ and you can recompile it you can also 
-optionally change it to not use inlined functions.  In addition to 
-removing any C<inline> keywords from the source, you need to move the 
-implementations of any methods outside of the class body.  That is, do 
+If you have the source of the C++ and you can recompile it you can also
+optionally change it to not use inlined functions.  In addition to
+removing any C<inline> keywords from the source, you need to move the
+implementations of any methods outside of the class body.  That is, do
 not do this:
 
  class Foo {
@@ -265,14 +265,14 @@ If you are getting errors like this:
 
  unable to find Foo::Foo()
 
-that can't be explained by the issues described above, set the 
-environment variable FFI_PLATYPUS_DLERROR to a true value and try again.  
+that can't be explained by the issues described above, set the
+environment variable FFI_PLATYPUS_DLERROR to a true value and try again.
 If you see a warning like this:
 
  error loading Foo.so: Foo.so: undefined symbol: __gxx_personality_v0
 
-then you probably need to explicitly link with the standard C++ library.  
-The most portable way to deal with this is by using 
+then you probably need to explicitly link with the standard C++ library.
+The most portable way to deal with this is by using
 L<ExtUtils::CppGuess>.
 
 =head1 METHODS
@@ -319,9 +319,9 @@ else
 sub mangler
 {
   my($class, @libs) = @_;
-  
+
   my %mangle;
-  
+
   foreach my $libpath (@libs)
   {
     extract_symbols($libpath,
@@ -335,7 +335,7 @@ sub mangler
       },
     );
   }
-  
+
   sub {
     defined $mangle{$_[0]} ? $mangle{$_[0]} : $_[0];
   };
@@ -353,7 +353,7 @@ determine the instance size of the class.
 
 =head2 Using a C++ class with a wrapper
 
-(For the full source for this example, see examples/wrapper.{pl,cpp} 
+(For the full source for this example, see examples/wrapper.{pl,cpp}
 that came with this distribution)
 
 Sometimes it is easier to write wrapper functions around your new and
@@ -374,7 +374,7 @@ source to the example in the L</SYNOPSIS>.
  }
 
 Now we can use this class without having to know I<in the perl code>
-what the size of the class is.  We declare the constructor and 
+what the size of the class is.  We declare the constructor and
 destructor in Perl space like this:
 
  $ffi->attach( [ 'Foo_new'        => 'new'      ] => []       => 'Foo' );
@@ -386,11 +386,11 @@ their intended names.
 
 =head2 Exceptions
 
-(For the full source of this example, see examples/exception.{pl,cpp} 
+(For the full source of this example, see examples/exception.{pl,cpp}
 that came with this distribution)
 
-If your library throws an exception and you do not catch it in C++ it 
-is going to kill your program.  As an example, suppose C<set_bar> in 
+If your library throws an exception and you do not catch it in C++ it
+is going to kill your program.  As an example, suppose C<set_bar> in
 the example above throws an exception:
 
  void
@@ -456,7 +456,7 @@ Next we will write an interface to the FooException class in Perl:
    perl_to_native => sub { ${ $_[0] } },
    native_to_perl => sub {
      defined $_[0]
-     ? (bless \$_[0], 'FooException') 
+     ? (bless \$_[0], 'FooException')
      : ();
    },
  });
@@ -491,20 +491,20 @@ to catch the exception and handle it.
 
 =head1 SUPPORT
 
-If something does not work as advertised, or the way that you think it 
-should, or if you have a feature request, please open an issue on this 
+If something does not work as advertised, or the way that you think it
+should, or if you have a feature request, please open an issue on this
 project's GitHub issue tracker:
 
 L<https://github.com/PerlFFI/FFI-Platypus-Lang-CPP/issues>
 
 =head1 CONTRIBUTING
 
-If you have implemented a new feature or fixed a bug then you may make a 
+If you have implemented a new feature or fixed a bug then you may make a
 pull reequest on this project's GitHub repository:
 
 L<https://github.com/PerlFFI/FFI-Platypus-Lang-CPP/issues>
 
-Caution: if you do this too frequently I may nominate you as the new 
+Caution: if you do this too frequently I may nominate you as the new
 maintainer.  Extreme caution: if you like that sort of thing.
 
 This project's GitHub issue tracker listed above is not Write-Only.  If
@@ -536,7 +536,7 @@ Bundle C or C++ with your FFI / Perl extension.
 
 =item L<ExtUtils::CppGuess>
 
-Guess the appropriate C++ compiler / linker flags for your C compiler 
+Guess the appropriate C++ compiler / linker flags for your C compiler
 platform combination.
 
 =back
