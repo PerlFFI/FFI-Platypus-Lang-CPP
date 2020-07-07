@@ -126,9 +126,9 @@ DESCRIPTION
     that subject.
 
     Note that in addition to using pre-compiled C++ libraries you can
-    bundle C++ code with your Perl distribution using Module::Build::FFI.
-    For a complete example, which attempts to address the caveats listed
-    below you can take a look at this sample distro on GitHub:
+    bundle C++ code with your Perl distribution using FFI::Build. For a
+    complete example, which attempts to address the caveats listed below
+    you can take a look at this sample distro on GitHub:
 
     https://github.com/plicease/Color-FFI
 
@@ -470,7 +470,7 @@ SEE ALSO
 
       The Core Platypus documentation.
 
-    Module::Build::FFI
+    FFI::Build + FFI::Build::File::CXX
 
       Bundle C or C++ with your FFI / Perl extension.
 
