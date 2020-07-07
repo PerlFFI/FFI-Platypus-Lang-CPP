@@ -3,10 +3,10 @@ use warnings;
 
 package Foo;
 
-use FFI::Platypus;
+use FFI::Platypus 1.00;
 use FFI::Platypus::Memory qw( malloc free );
 
-my $ffi = FFI::Platypus->new;
+my $ffi = FFI::Platypus->new( api => 1 );
 $ffi->lang('CPP');
 $ffi->lib('./wrapper.so');
 
