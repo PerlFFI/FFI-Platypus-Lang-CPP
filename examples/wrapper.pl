@@ -19,7 +19,7 @@ $ffi->custom_type( Foo => {
 $ffi->attach( [ 'Foo_new'        => 'new'      ] => []       => 'Foo' );
 $ffi->attach( [ 'Foo_delete'     => 'DESTROY'  ] => ['Foo']  => 'void' );
 $ffi->attach( [ 'Foo::get_bar()' => 'get_bar'  ] => ['Foo']  => 'int'  );
-$ffi->attach( [ 'Foo::set_bar(int)' 
+$ffi->attach( [ 'Foo::set_bar(int)'
                                  => 'set_bar'  ] => ['Foo','int']
                                                              => 'void' );
 

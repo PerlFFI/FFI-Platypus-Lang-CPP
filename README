@@ -79,7 +79,7 @@ SYNOPSIS
      $ffi->attach( [ 'Foo::Foo()'     => '_new'     ] => ['Foo']  => 'void' );
      $ffi->attach( [ 'Foo::~Foo()'    => '_DESTROY' ] => ['Foo']  => 'void' );
      $ffi->attach( [ 'Foo::get_bar()' => 'get_bar'  ] => ['Foo']  => 'int'  );
-     $ffi->attach( [ 'Foo::set_bar(int)' 
+     $ffi->attach( [ 'Foo::set_bar(int)'
                                       => 'set_bar'  ] => ['Foo','int']
                                                                   => 'void' );
      
@@ -398,7 +398,7 @@ EXAMPLES
        perl_to_native => sub { ${ $_[0] } },
        native_to_perl => sub {
          defined $_[0]
-         ? (bless \$_[0], 'FooException') 
+         ? (bless \$_[0], 'FooException')
          : ();
        },
      });
