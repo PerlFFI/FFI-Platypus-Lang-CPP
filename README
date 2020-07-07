@@ -5,6 +5,14 @@ NAME
 
 SYNOPSIS
 
+    NOTE: The original author of this module considered the techniques used
+    by and documented by this module to be somewhate experimental even back
+    in 2015 when he wrote it. The original author now thinks that it is
+    probably safer to write a C API layer between your C++ library and Perl
+    rather than try to call C++ directly as advocated by this module. While
+    the original author has not yet deprecated this module, users of this
+    module should consider its limitations before using it.
+
     C++:
 
      // on Linux compile with: g++ --shared -o basic.so basic.cpp
