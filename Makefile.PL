@@ -37,7 +37,7 @@ my %WriteMakefileArgs = (
     'ExtUtils::CBuilder'  => '0.27',
   },
   BUILD_REQUIRES => {
-    # ...
+    'Test::More' => '0.98',
   },
   PREREQ_PM => {
     'FFI::Platypus'       => '1.00',
