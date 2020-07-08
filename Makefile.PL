@@ -32,8 +32,9 @@ my %WriteMakefileArgs = (
   MIN_PERL_VERSION   => '5.008001',
   CONFIGURE_REQUIRES => {
     'ExtUtils::MakeMaker' => '6.64',
-    'File::Which'         => 0,
+    'File::Which'         => '0',
     'FFI::Build::MM'      => '1.00',
+    'ExtUtils::CBuilder'  => '0.27',
   },
   BUILD_REQUIRES => {
     # ...
